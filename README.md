@@ -1,1 +1,1 @@
-Readme is yet to update completely
+Readme is yet to be update completely.
