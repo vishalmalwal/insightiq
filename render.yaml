@@ -1,0 +1,41 @@
+# Render blueprint for the InsightIQ API.
+# Deploy: New → Blueprint → point at this repo. Set the sync:false secrets in the
+# Render dashboard (they are never committed). Postgres = Neon; DuckDB files = R2.
+services:
+  - type: web
+    name: insightiq-api
+    runtime: docker
+    plan: free                      # free tier: spins down when idle → cold starts
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    # Run migrations before each deploy goes live.
+    preDeployCommand: alembic upgrade head
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: LLM_PROVIDER
+        value: gemini              # or "mock" for a zero-key demo
+      - key: STORAGE_BACKEND
+        value: r2
+      - key: DUCKDB_DIR
+        value: /tmp/duckdb         # ephemeral cache; source of truth is R2
+      - key: CORS_ORIGINS
+        value: '["https://insightiq.vercel.app"]'   # your Vercel origin(s)
+      # ---- secrets: set in the Render dashboard (sync:false) ----
+      - key: DATABASE_URL          # Neon: postgresql+psycopg://...:...@ep-xxx.neon.tech/insightiq?sslmode=require
+        sync: false
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: CREDENTIALS_ENCRYPTION_KEY   # python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+        sync: false
+      - key: APP_SHARED_SECRET     # gates write/LLM actions; blank = open sample-data demo
+        sync: false
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET
+        sync: false

@@ -1,0 +1,113 @@
+/* react-grid-layout — @import must precede all other statements */
+@import "react-grid-layout/css/styles.css";
+@import "react-resizable/css/styles.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---- theme tokens ---- */
+:root,
+.dark {
+  --canvas: 11 15 26; /* #0B0F1A deep slate */
+  --text: 237 242 249;
+  --muted: 148 163 184;
+  --panel-bg: 255 255 255 / 0.04;
+  --panel-border: 255 255 255 / 0.09;
+  --grid-hover: 255 255 255 / 0.05;
+}
+:root:not(.dark) {
+  --canvas: 248 250 252; /* #F8FAFC */
+  --text: 15 23 42;
+  --muted: 100 116 139;
+  --panel-bg: 255 255 255 / 1;
+  --panel-border: 15 23 42 / 0.08;
+  --grid-hover: 15 23 42 / 0.03;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  background: rgb(var(--canvas));
+  color: rgb(var(--text));
+  font-family: Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- glass panel ---- */
+.panel {
+  background: rgba(var(--panel-bg));
+  border: 1px solid rgba(var(--panel-border));
+  border-radius: 1rem;
+  backdrop-filter: blur(12px);
+}
+.panel-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .panel-hover:hover {
+    transform: translateY(-2px);
+    border-color: rgba(124, 58, 237, 0.4);
+  }
+}
+
+/* ---- aurora accent (restrained: hero, ask-bar focus, KPI) ---- */
+.aurora {
+  background-image: linear-gradient(120deg, #7c3aed, #06b6d4, #d946ef);
+}
+.aurora-text {
+  background-image: linear-gradient(120deg, #a78bfa, #22d3ee, #f0abfc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.aurora-ring:focus-within {
+  border-color: transparent;
+  box-shadow: 0 0 0 1.5px transparent,
+    0 0 0 2px rgb(var(--canvas)),
+    0 0 22px -2px rgba(124, 58, 237, 0.55);
+  background-image: linear-gradient(rgb(var(--canvas)), rgb(var(--canvas))),
+    linear-gradient(120deg, #7c3aed, #06b6d4, #d946ef);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+/* hero aurora mesh */
+.aurora-hero {
+  background:
+    radial-gradient(60% 80% at 15% 10%, rgba(124, 58, 237, 0.28), transparent 60%),
+    radial-gradient(50% 70% at 85% 20%, rgba(6, 182, 212, 0.22), transparent 60%),
+    radial-gradient(60% 90% at 60% 90%, rgba(217, 70, 239, 0.18), transparent 60%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .aurora-hero {
+    animation: drift 20s ease-in-out infinite alternate;
+  }
+}
+@keyframes drift {
+  0% {
+    background-position: 0% 0%, 100% 0%, 50% 100%;
+  }
+  100% {
+    background-position: 20% 15%, 80% 10%, 40% 85%;
+  }
+}
+
+/* ---- scrollbar ---- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--muted) / 0.3);
+  border-radius: 999px;
+}
+
+/* react-grid-layout placeholder tint */
+.react-grid-item.react-grid-placeholder {
+  background: rgba(124, 58, 237, 0.25) !important;
+  border-radius: 1rem;
+}
