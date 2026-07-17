@@ -157,7 +157,3 @@ insightiq eval         # SQL-accuracy suite
 - [x] **Phase 4** -- charted dashboard (deterministic chart selector, ECharts, grid, date filter, captions, midnight-analytics UI)
 - [x] **Phase 5** -- eval suite (30 cases, denotation harness, per-provider scoring, CI gate, results page)
 - [x] **Phase 6** -- hardening + launch (R2 storage, deploy blueprints, shareable dashboards, case study)
-
-## License
-
-MIT -- see [`LICENSE`](LICENSE).
