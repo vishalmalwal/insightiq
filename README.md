@@ -10,20 +10,6 @@
   <img alt="license" src="https://img.shields.io/badge/license-MIT-black">
 </p>
 
-<p align="center">
-  <b><a href="https://insightiq.vercel.app">Live demo</a></b> ·
-  <a href="docs/DESIGN.md">Design doc</a> ·
-  <a href="docs/DEMO_SCRIPT.md">Demo script</a>
-</p>
-
-<!-- Replace with a recording of the resolving-dashboard hero (Ask bar -> grid animates in). -->
-<p align="center"><img alt="InsightIQ demo" src="docs/demo.gif" width="820"></p>
-
-> **60-second tour:** open the live demo -> the e-commerce project is preloaded ->
-> click **"compare monthly revenue by region this year vs last year and show top
-> products"** -> watch the Ask bar collapse as a full charted dashboard resolves
-> into place. Then switch to the **Evals** tab to see the pipeline scored.
-
 ---
 
 ## The problem
@@ -95,7 +81,6 @@ Full DDL, API contract, and semantic-layer schema in [`docs/DESIGN.md`](docs/DES
 | **Deterministic chart selection + planner fallback** | Instant, testable, $0; the eval baseline is stable | A rules engine is less flexible than an LLM for exotic asks |
 | **Only semantic *names* + the question reach the LLM -- never rows** | Strong privacy story; lets the hosted demo use the free Gemini tier | The planner can't peek at values to disambiguate |
 | **Denotation-match eval with hand-written gold SQL** | Catches silently-wrong answers, not just broken SQL; can genuinely fail | Writing/maintaining gold queries; the fingerprint has a narrow blur case |
-| **All-free hosting (Vercel + Render + Neon + R2)** | $0 to run a public portfolio demo | Render's free tier **cold-starts** (~30-50s after idle); DuckDB files load on demand from R2 |
 | **Single-user, project-scoped soft auth** | Ships a demo without an auth system; isolation is at `project_id` so real auth is a middleware swap | Not multi-tenant as-is |
 
 ## Privacy
@@ -132,18 +117,6 @@ insightiq eval                      # deterministic -> 77%, 23/23 gate
 insightiq eval --provider gemini    # scores the real Gemini planner (needs a key)
 ```
 
-## The planted insights (what the demo is built to reveal)
-
-The synthetic data is seeded deterministically with real, findable stories:
-
-- **Holiday spike** -- November/December revenue runs **~2.3x a normal month**.
-- **Tier-2 Q3 dip** -- Tier-2 cities' Q3 revenue collapses to **~0.3x** their
-  own baseline while Tier-1 holds steady.
-- **Churn cliff** -- SaaS accounts churn in a sharp band around a **92-day** median.
-- **Plan churn gradient** -- Basic **45.5%** / Pro **21.6%** / Enterprise **10.0%**.
-
-See [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) for a 60-90s walkthrough of two of them.
-
 ## Tech stack
 
 | Layer | Choice |
@@ -152,7 +125,6 @@ See [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) for a 60-90s walkthrough of two
 | LLM | **Google Gemini free tier ($0)** behind a swappable adapter with native structured output; `mock` for tests/CI; `anthropic` as the paid BYO-key path |
 | Frontend | React 18 + Vite + TS, Tailwind, **ECharts**, TanStack Query, react-grid-layout, Framer Motion, Lenis |
 | Data | Postgres metadata (Neon) - DuckDB per project behind a `StorageBackend` (local <-> **Cloudflare R2**) |
-| Deploy | **Vercel** (web) - **Render** (API) - **Neon** (Postgres) - **R2** (DuckDB) -- all free tiers |
 | Infra | Docker Compose - GitHub Actions (lint - types - tests - migration up/down - **eval gate**) |
 
 ## Run it locally
@@ -175,26 +147,6 @@ cd frontend && npm install && npm run dev
 pytest                 # 72 backend tests
 insightiq eval         # SQL-accuracy suite
 ```
-
-## Deploy (all free tiers)
-
-1. **Neon** -- create a Postgres project; copy the `postgresql+psycopg://...?sslmode=require` URL.
-2. **Cloudflare R2** -- create a bucket + an S3 API token; note account id, key, secret, bucket.
-3. **Render** -- *New -> Blueprint* on this repo ([`render.yaml`](render.yaml)). Set the
-   `sync:false` secrets (`DATABASE_URL`, `GOOGLE_API_KEY`, `CREDENTIALS_ENCRYPTION_KEY`,
-   `R2_*`, optional `APP_SHARED_SECRET`). `preDeployCommand` runs `alembic upgrade head`.
-4. **Vercel** -- import the repo ([`vercel.json`](vercel.json), root `frontend/`); set
-   `VITE_API_BASE` to the Render API URL and add your Vercel origin to `CORS_ORIGINS` on Render.
-5. **Seed** the hosted demo once: `insightiq seed` against the Neon URL (writes DuckDB
-   files to R2).
-
-> **Cold starts:** Render's free tier spins the API down when idle, so the *first*
-> request after a quiet period takes ~30-50s while it wakes and pulls DuckDB files
-> from R2. Subsequent requests are fast. (Upgrade the Render plan or add a keep-warm
-> ping to remove this.)
-
-All env vars are documented in [`.env.example`](.env.example) (backend) and
-[`frontend/.env.example`](frontend/.env.example).
 
 ## Roadmap
 
